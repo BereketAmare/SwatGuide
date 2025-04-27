@@ -9,6 +9,8 @@ from datetime import datetime
 
 app = Flask(__name__)
 
+app.secret_key = os.environ.get("SECRET_KEY", "dev-please-change")
+
 db_uri = os.environ["DATABASE_URL"].replace("postgres://", "postgresql://")
 app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
