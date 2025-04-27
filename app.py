@@ -11,7 +11,9 @@ app = Flask(__name__)
 # Configure database
 app.config['CACHE_TYPE'] = 'null' # disable if in production environment
 app.config['SECRET_KEY'] = 'secret key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+# provided by Render
+app.config['SQLALCHEMY_DATABASE_URI'] = ('    os.environ.get("Dpostgresql://swatguide_db_user:IkEt1BgLPTuONZN8nganizGM6Ae9fNAh@dpg-d06qtt3uibrs73ermj40-a.oregon-postgres.render.com/swatguide_db").replace("postgres://", "postgresql://")
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Enable CORS
