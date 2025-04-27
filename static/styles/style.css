@@ -321,7 +321,8 @@ body {
     min-height: auto;
 }
 
-.main_content_container {
+#login .main_content_container,
+#register .main_content_container {
     min-height: calc(100vh - 340px);
     margin-bottom: 0;
 }
@@ -775,15 +776,6 @@ a:link, a:visited {
 }
 
 .exit{
-<<<<<<< HEAD
-    text-align: right;
-        margin-left: 320px;
-        background-color: #efebeb;
-        cursor: pointer;
-        padding: 10px 10px;
-        border: none;
-    }
-=======
     text-align:right;
     margin-left: 320px;
     background-color: #efebeb;
@@ -791,7 +783,6 @@ a:link, a:visited {
     padding: 10px 10px;
     border: none;
 }
->>>>>>> origin/main
 
 .report_option {
     background-color: #efebeb;
