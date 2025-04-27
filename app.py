@@ -9,23 +9,13 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-
-# pull DATABASE_URL that Render injects
-db_uri = os.environ.get("DATABASE_URL")
-if db_uri is None:
-    raise RuntimeError("DATABASE_URL is not set — check Render env-vars")
-
-# make it SQLAlchemy-friendly
-db_uri = db_uri.replace("postgres://", "postgresql://")
-
-# configure Flask-SQLAlchemy
+db_uri = os.environ["DATABASE_URL"].replace("postgres://", "postgresql://")
 app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-db = SQLAlchemy(app)
 
-# Initialize db to be used with current Flask app
+db = SQLAlchemy(app)         
+
 with app.app_context():
-    db.init_app(app)
     db.create_all()
 
 # HOME 
