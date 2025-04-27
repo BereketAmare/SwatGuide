@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{# Page title #}
+{% block title %}SwatGuide - Home{% endblock %}
+
+{# Header section with search functionality and guide creation button #}
+{% block header_links %}
+{{ super() }}
+
+{# Search container with form #}
+<div class="search_container">
+    <form id="search_form" action="{{ url_for('search_results') }}" method="get">
+        <div class="search_input_container">
+            <input type="text" 
+                   id="search_input" 
+                   name="search" 
+                   placeholder="Search guides..." 
+                   required>
+            <button type="submit" class="button_link">
+                <i class="fas fa-search"></i>&nbsp;&nbsp;Search
+            </button>
+        </div>
+    </form>
+</div>
+
+{# Create new guide button #}
+<a href="{{ url_for('post_guide') }}" class="button_link">
+    <i class="fas fa-plus"></i>&nbsp;&nbsp;Make a Guide post
+</a>
+{% endblock %}
+
+{# Main content section #}
+{% block content %}
+{# Top guides header #}
+<div class="header_container">
+    <h1 class = "top_guide">Top Guides</h1>
+</div>
+
+{# Guide listings container #}
+<div class="main_content_container home_container">
+    <div class="guide_list">
+        <div class="list-group">
+            {% if guides %}
+                {% for guide in guides %}
+                    <div class="list-group-item">
+                        <h4>
+                            <a href="{{ url_for('view_guide', guide_id=guide.id) }}" 
+                               class="view_guide_link">
+                                {{ guide.title }}
+                            </a>
+                        </h4>
+                        <h5>By <a href="{{ url_for('profile_page', username=guide.user.username) }}">{{ guide.user.username }}</a></h5>
+                        <div class="guide_content_preview">
+                            {{ guide.content[:150] | striptags }}{% if guide.content|length > 100 %}...{% endif %}
+                        </div>
+                        <div class="guide_footer">
+                            <div class="guide_engage">
+                                <button class="icon-btn like_post_btn" data-guide-id="{{ guide.id }}">
+                                    <span class="like_count">{{ guide.num_likes }}</span>
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                                <button class="icon-btn">
+                                    <span class="comment_count">{{ guide.comments|length }}</span>
+                                    <i class="fas fa-comment-dots"></i>
+                                </button>
+                            </div>
+                            {% if guide.content|length > 150 %}
+                            <a href="{{ url_for('view_guide', guide_id=guide.id) }}" class="read_more button_link">Read more</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="list-group-item">
+                <div class="no_wiki">
+                    <img src="{{ url_for('static', filename='images/svgviewer-output.svg') }}" 
+                         alt="No Wiki Icon" 
+                         class="no_wiki_icon">
+                    <h4 id="no_guides_message">No guides to show</h4>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+</div>
+{% endblock %}

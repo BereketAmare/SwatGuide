@@ -1,0 +1,113 @@
+
+{% extends "base.html" %}
+
+{# Page title block #}
+{% block title %}
+    {% if guide %}
+        {{ guide.title }} - SwatGuide
+    {% else %}
+        View Guide - SwatGuide
+    {% endif %}
+{% endblock %}
+
+{# Header links block #}
+{% block header_links %}
+{{ super() }}
+{% endblock %}
+
+{# Main content block #}
+{% block content %}
+<div class="header_container">
+    <h2>Post Title</h2>
+</div>
+
+<div class="main_content_container">
+  {% if guide %}
+    {# Guide content goes here #}
+  {% else %}
+    {# Author information section #}
+    <div class="author_info">
+      <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="Author's profile picture">
+      <span><a href="{{ url_for('profile_page') }}">User12</a></span>
+    </div>
+
+    {# Post content section #}
+    <div class="guide_content">
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+    </div>
+
+    {# Post engagement buttons #}
+    <div class="guide_engage"> 
+      <button class="icon-btn like_post_btn" data-post-id="{{ post.id }}" title="Like post">
+        <span class="like_count">0</span>
+        <i class="fas fa-heart"></i>
+      </button>
+      <button class="icon-btn" id="comment_btn" title="Show comments">
+        <i class="fas fa-comment-dots"></i>
+      </button>
+      <button class="icon-btn report_cmnt_btn" title="Report post">
+        <i class="fas fa-flag"></i>
+      </button>
+    </div>
+
+    {# Comments section #}
+    <div class="comment_section">
+      <h3>Comments</h3>
+      {# Sample comment #}
+      <div class="comment"> 
+        <div class="comment_author">
+          <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="Commenter's profile picture">
+          <a href="{{ url_for('profile_page') }}">Amelia</a>
+        </div>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        <div class="comment_engage">
+          <button class="icon-btn like_cmnt_btn" title="Like comment">
+            <span class="like_count">0</span>
+            <i class="fas fa-heart"></i>
+          </button>
+          <button class="icon-btn reply_btn" title="Reply to comment">
+            <i class="fas fa-reply"></i>
+          </button>
+          <button class="icon-btn report_cmnt_btn" title="Report comment">
+            <i class="fas fa-flag"></i>
+          </button>
+        </div>
+      </div>
+
+      {# Report overlay #}
+      <div id="report_overlay">
+        <div id="report_container">
+          <p>Select a reason</p>
+          <button class="report_option" onclick="option('Spam')">Spam</button>
+          <button class="report_option" onclick="option('Inappropriate')">Inappropriate</button>
+          <button class="report_option" onclick="option('Hate Speech')">Hate Speech</button>
+        </div>
+      </div>
+
+      {# Reply form #}
+      <div class="comment_engage_form">
+        <div class="reply_form">
+          <form> 
+            <textarea placeholder="Add your reply here..." required></textarea>
+            <button type="submit" class="button_link">Reply</button>
+          </form>
+        </div>
+      </div>
+
+      {# New comment section #}
+      <div class="comment_input">
+        <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="Current user's profile picture">
+        <a href="{{ url_for('profile_page') }}">User12</a>
+      </div>
+      <div class="comment_form">
+        <form>
+          <textarea placeholder="Add your comment here..." required></textarea>
+          <button type="submit" class="button_link">Comment</button>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<script src="{{url_for('static', filename='js/view_guide.js') }}"></script>
+{% endblock %}

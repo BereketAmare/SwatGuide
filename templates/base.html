@@ -1,0 +1,69 @@
+
+<!DOCTYPE html>
+<html lang="en">
+{% block head %}
+<head>
+    {# Meta tags for character encoding and responsive viewport #}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    {# Page title block that can be overridden by child templates #}
+    <title>{% block title %}SwatGuide{% endblock %}</title>
+    
+    {# External resources and stylesheets #}
+    <link rel="icon" href="{{ url_for('static', filename='images/swat_guide_logo3.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+{% endblock %}
+<body>
+    {# Navigation header container #}
+    <div class="container">
+        {# Logo and site name section #}
+        <div id="logo_name">
+            <h1>
+                <img class="logo" src="{{ url_for('static', filename='images/swat_guide_logo3.png') }}" alt="SwatGuide Logo">
+                <a href="{{ url_for('home') }}">SwatGuide</a>
+            </h1>
+        </div>
+
+        {# Navigation links section #}
+        <div id="nav_bar_links">
+            {% block header_links %}
+            {% endblock %}
+        </div>
+
+        {# User profile section #}
+        {% block profile %}
+        <div id="profile">
+            <h1>
+                <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="profile pic">
+                {% if user %}
+                <a href="{{ url_for('profile_page') }}">{{ user.username }}</a>
+                {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+                {% endif %}
+            </h1>
+        </div>
+        {% endblock %}
+    </div>
+
+    {# Main content section #}
+    {% block content %}
+    {% endblock %}
+
+    {# Footer section #}
+    <div id="footer">
+        {% block footer %}
+        <div class="footer_top">
+            <h2>SwatGuide</h2>
+            <p>A platform for sharing knowledge and guides with the community.</p>
+        </div>
+        <hr class="content-divider">
+        <div class="footer_bottom">
+            &copy; Copyright 2025 by Tsiyon Abera, Melanie Navarro, and Bereket Nigussie
+        </div>
+        {% endblock %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{# Page title #}
+{% block title %}
+{% if user %}
+    {{ user.username }}'s Profile
+{% else %}
+    Profile
+{% endif %}
+ - SwatGuide
+ {% endblock %}
+
+{# Add JavaScript for profile page functionality #}
+{% block head %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/profile_page.js') }}" defer></script>
+{% endblock %}
+
+{# Main content section #}
+{% block content %}
+<div class="main_content_container">
+        {# User profile header with picture and name #}
+        <div class="profile_container">
+            <div class="profile_pic_container">
+                <img class="p_p" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="profile pic">
+            </div>
+            <h1 class="name">{{ user.username }}</h1>
+        </div>
+
+    {# User description section #}
+    <div class="profile_section">
+        <h2 class="section_title">Description</h2>
+        <div class="section_content">
+            <div id="editableDiv" class="editable">
+                {{ user.description|safe if user.description else "This is a description" }}
+            </div>
+        </div>
+    </div>
+
+    {# Edit profile button #}
+    <button id="edit_button" class="edit_profile_btn button_link">
+        <i class="fas fa-edit"></i>&nbsp;&nbsp;Edit
+    </button>
+
+    <hr class="profile_divider">
+
+    {# User's guide contributions #}
+    <div class="guide_list">
+        <h2 class="section_title">List of Contributed Guides</h2>
+            <div class="list-group">
+                {% if guides %}
+                    {% for guide in guides %}
+                        <div class="list-group-item">
+                            <h4><a href="{{ url_for('view_guide', guide_id=guide.id) }}" class="view_guide_link">{{ guide.title }}</a></h4>
+                            {{ guide.content[:100] | striptags }}{% if guide.content|length > 100 %}... <a href="{{ url_for('view_guide', guide_id=guide.id) }}">Read more</a>{% endif %}
+                            <div class="guide_engage">
+                                <button class="icon-btn like_post_btn" data-guide-id="{{ guide.id }}">
+                                    <span class="like_count">{{ guide.num_likes }}</span>
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                                <button class="icon-btn">
+                                    <span class="comment_count">{{ guide.comments|length }}</span>
+                                    <i class="fas fa-comment-dots"></i>
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="list-group-item">
+                        <div class="no_wiki">
+                            <img src="{{ url_for('static', filename='images/svgviewer-output.svg') }}" alt="No Wiki Icon" class="no_wiki_icon">
+                            <h4>No guides created yet</h4>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {# Logout button #}
+        <div class="profile_logout">
+            <button onclick="window.location.href='{{ url_for('logout') }}'" class="button_link"><i class="fas fa-sign-out-alt"></i>&nbsp;&nbsp;Log Out</button>
+        </div>
+</div>
+{% endblock %}

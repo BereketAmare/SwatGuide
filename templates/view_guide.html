@@ -1,0 +1,148 @@
+
+{% extends "base.html" %}
+
+{# Page title block #}
+{% block title %}
+    {% if guide %}
+        {{ guide.title }} - SwatGuide
+    {% else %}
+        View Guide - SwatGuide
+    {% endif %}
+{% endblock %}
+
+{# Header links block - includes necessary scripts #}
+{% block header_links %}
+{{ super() }}
+<script src="https://cdn.ckeditor.com/ckeditor5/40.1.0/classic/ckeditor.js"></script>
+<script src="{{url_for('static', filename='js/view_guide.js') }}" defer></script>
+{% endblock %}
+
+{# Main content block #}
+{% block content %}
+<div class="main_content_container view_guide">
+  {% if guide %}
+    {# Guide header section with title and metadata #}
+    <div class="header_container">
+      <h1>{{ guide.title }}</h1>
+      <div class="guide_metadata">
+        <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="{{ guide.user.username }}'s profile picture">
+        <a href="{{ url_for('profile_page', username=guide.user.username) }}">{{ guide.user.username }}</a>
+        <span class="date"><i class="fa-solid fa-calendar"></i>&nbsp;&nbsp;{{ guide.created_at.strftime('%B %d, %Y') }}</span>
+      </div>
+    </div>
+
+    <hr class="content-divider">
+
+    {# Guide content section #}
+    <div class="guide_content" id="guideContent" {% if user.id == guide.user_id %}contenteditable="false"{% endif %}>
+      {{ guide.content | safe}}
+    </div>
+
+    {# Edit button for guide owner #}
+    {% if user.id == guide.user_id %}
+    <button id="edit_guide_button" class="edit-profile-btn button_link" title="Edit guide content">
+      <i class="fas fa-edit"></i>&nbsp;&nbsp;Edit Guide
+    </button>
+    {% endif %}
+
+    {# Guide engagement buttons #}
+    <div class="guide_engage"> 
+      <button class="icon-btn like_post_btn" data-guide-id="{{ guide.id }}" title="Like guide">
+        <span class="like_count">{{ guide.num_likes }}</span>
+        <i class="fas fa-heart"></i>
+      </button>
+      <button class="icon-btn" id="reply_btn" title="Show comments">
+        <span class="comment_count">{{ guide.comments|length }}</span>
+        <i class="fas fa-comment-dots"></i>
+      </button> 
+      <button class="icon-btn report_cmnt_btn" title="Report guide">
+        <i class="fas fa-flag"></i>
+      </button>
+    </div>
+
+    {# Comments section #}
+    <h3>Comments</h3>
+    <div class="comment_form">
+      <div class="comment_author_info">
+        <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="{{ user.username }}'s profile picture">
+        <a href="{{ url_for('profile_page') }}">{{ user.username }}</a>
+      </div>
+      <form action="{{ url_for('comment', guide_id=guide.id) }}" method="POST" id="comment_form"> 
+        <textarea id="content" name="content" placeholder="Add your comment here..." required></textarea>
+        <button type="submit" class="button_link">Post Comment</button>
+      </form>
+    </div>
+
+    {# Comments list #}
+    <ul class="list-group">
+      {% for comment in guide.comments %}
+        <li class="comment">
+          {# Comment header with author info #}
+          <div class="comment_header">
+            <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="{{ comment.user.username }}'s profile picture">
+            <strong><a href="{{ url_for('profile_page', username=comment.user.username) }}">{{ comment.user.username }}</a></strong>
+          </div>
+          {# Comment content #}
+          <div class="comment_content">
+            {{ comment.content }}
+          </div>
+          {# Comment engagement buttons #}
+          <div class="comment_engage">
+            <button class="icon-btn reply_btn" title="Reply to comment">
+              <i class="fas fa-reply"></i>
+            </button> 
+            <button class="icon-btn report_cmnt_btn" title="Report comment">
+              <i class="fas fa-flag"></i>
+            </button> 
+          </div>
+
+          {# Reply form #}
+          <form action="{{ url_for('reply', comment_id=comment.id) }}" method="POST" class="reply_form"> 
+            <textarea name="content" placeholder="Add your reply here..." required></textarea>
+            <button type="submit" class="button_link">Post Reply</button>
+          </form>
+
+          {# Replies list #}
+          {% if comment.replies %}
+            <ul class="reply_list">
+              {% for reply in comment.replies %}
+                <li>
+                  <div class="comment_header">
+                    <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="{{ reply.user.username }}'s profile picture">
+                    <strong><a href="{{ url_for('profile_page', username=reply.user.username) }}">{{ reply.user.username }}</a></strong>
+                  </div>
+                  <div class="comment_content">
+                    {{ reply.content }}
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+
+    {# Report overlay #}
+    <div id="report_overlay">
+      <div id="report_container">
+        <button class="exit" onclick="option('X')">X</button>
+        <p>Select a reason</p>
+        <button class="report_option" onclick="option('Spam')">Spam</button>
+        <button class="report_option" onclick="option('Inappropriate')">Inappropriate</button>
+        <button class="report_option" onclick="option('Hate Speech')">Hate Speech</button>
+      </div>
+    </div>
+
+    {# Message overlay #}
+    <div id="message_overlay">
+      <div id="message_container">
+        <button class="exit" onclick="option('X')">X</button>
+        <p>Your report has been submitted!</p>
+      </div>
+    </div>
+
+  {% else %}
+    <p>Guide not found.</p>
+  {% endif %}
+</div>
+{% endblock %}

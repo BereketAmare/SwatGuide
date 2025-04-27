@@ -1,0 +1,43 @@
+
+{% extends "base.html" %}
+
+{# Page title #}
+{% block title %}SwatGuide - Login{% endblock %}
+
+{# Remove header links for login page #}
+{% block header_links %}
+{% endblock %}
+
+{# Remove profile section for login page #}
+{% block profile %}
+{% endblock %}
+
+{# Main content section #}
+{% block content %}
+<br><br>
+<div id="login">
+    <h2>Login to your Account</h2>
+    <br><br>
+    {# Login form #}
+    <form action="{{ url_for('login') }}" method="post" class="auth-form">
+        <div style="text-align: left;">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <br>
+        <div style="text-align: left;">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <br>
+        <div>
+            <button type="submit">Login</button>
+        </div>
+    </form>
+    <br>
+    {# Registration link #}
+    <div>
+        Don't have an account? Register <a class="register_here" href="{{ url_for('register') }}">here</a>.
+    </div>
+</div>
+{% endblock %}

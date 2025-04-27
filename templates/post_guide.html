@@ -1,0 +1,31 @@
+
+{% extends "base.html" %}
+
+{# Page title #}
+{% block title %}Create New Guide - SwatGuide{% endblock %}
+
+{# Include CKEditor and custom JavaScript #}
+{% block head %}
+{{ super() }}
+<script src="https://cdn.ckeditor.com/ckeditor5/40.1.0/classic/ckeditor.js"></script>
+<script src="{{ url_for('static', filename='js/post_guide.js') }}" defer></script>
+{% endblock %}
+
+{# Main content section #}
+{% block content %}
+<div class="header_container">
+    <h1 class="top_guide">Make a new Guide</h1>
+</div>
+
+{# Guide creation form #}
+<div class="main_content_container">
+    <form id="guide_form">
+        <label for="title">Guide Title</label>
+        <input type="text" id="title" placeholder="Enter your guide title..." required>
+        
+        <label for="editor">Content</label>
+        <div id="editor"></div>
+        <button type="submit" class="button_link">Post Guide</button>
+    </form>
+</div>
+{% endblock %}

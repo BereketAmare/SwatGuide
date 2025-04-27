@@ -1,0 +1,26 @@
+
+{% extends "base.html" %}
+
+{# Page title #}
+{% block title %}SwatGuide - Error{% endblock %}
+
+{# Remove header links for error page #}
+{% block header_links %}
+{% endblock %}
+
+{# Main content section #}
+{% block content %}
+<br><br>
+<div id="login">
+    {# Error message display #}
+    <div>
+        <h3>Error Occurred</h3>
+        <p>{{ error }}</p>
+        {% if 'register' in error %}
+            <p>Click <a class="register_here" href="{{ url_for('register') }}">here</a> to register.</p>
+        {% else %}
+            <p>Click <a class="register_here" href="{{ url_for('login') }}">here</a> to try again.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
