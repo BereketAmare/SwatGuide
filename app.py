@@ -8,16 +8,19 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Configure database
-app.config['CACHE_TYPE'] = 'null' # disable if in production environment
-app.config['SECRET_KEY'] = 'secret key'
-# provided by Render
-app.config['SQLALCHEMY_DATABASE_URI'] = ('    os.environ.get("Dpostgresql://swatguide_db_user:IkEt1BgLPTuONZN8nganizGM6Ae9fNAh@dpg-d06qtt3uibrs73ermj40-a.oregon-postgres.render.com/swatguide_db").replace("postgres://", "postgresql://")
-)
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Enable CORS
-CORS(app)
+# pull DATABASE_URL that Render injects
+db_uri = os.environ.get("DATABASE_URL")
+if db_uri is None:
+    raise RuntimeError("DATABASE_URL is not set — check Render env-vars")
+
+# make it SQLAlchemy-friendly
+db_uri = db_uri.replace("postgres://", "postgresql://")
+
+# configure Flask-SQLAlchemy
+app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+db = SQLAlchemy(app)
 
 # Initialize db to be used with current Flask app
 with app.app_context():
