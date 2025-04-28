@@ -50,7 +50,7 @@
                             </a>
                         </h4>
                         <h5>By <a href="{{ url_for('profile_page', username=guide.user.username) }}" class="profile-link">{{ guide.user.username
-                                }}</a></h5>>
+                                }}</a></h5>
                         <div class="guide_content_preview">
                             {{ guide.content[:150] | striptags }}{% if guide.content|length > 100 %}...{% endif %}
                         </div>
