@@ -26,7 +26,7 @@
       <h1>{{ guide.title }}</h1>
       <div class="guide_metadata">
         <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="{{ guide.user.username }}'s profile picture">
-        <a href="{{ url_for('profile_page', username=guide.user.username) }}">{{ guide.user.username }}</a>
+        <a href="{{ url_for('profile_page', user_id=guide.user.id) }}">{{ guide.user.username }}</a>
         <span class="date"><i class="fa-solid fa-calendar"></i>&nbsp;&nbsp;{{ guide.created_at.strftime('%B %d, %Y') }}</span>
       </div>
     </div>
@@ -65,7 +65,7 @@
     <div class="comment_form">
       <div class="comment_author_info">
         <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="{{ user.username }}'s profile picture">
-        <a href="{{ url_for('profile_page') }}">{{ user.username }}</a>
+        <a href="{{ url_for('profile_page', user_id=user.id) }}">{{ user.username }}</a>
       </div>
       <form action="{{ url_for('comment', guide_id=guide.id) }}" method="POST" id="comment_form"> 
         <textarea id="content" name="content" placeholder="Add your comment here..." required></textarea>
@@ -80,7 +80,7 @@
           {# Comment header with author info #}
           <div class="comment_header">
             <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="{{ comment.user.username }}'s profile picture">
-            <strong><a href="{{ url_for('profile_page', username=comment.user.username) }}">{{ comment.user.username }}</a></strong>
+            <strong><a href="{{ url_for('profile_page', user_id=comment.user.id) }}">{{ comment.user.username }}</a></strong>
           </div>
           {# Comment content #}
           <div class="comment_content">
@@ -109,7 +109,7 @@
                 <li>
                   <div class="comment_header">
                     <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="{{ reply.user.username }}'s profile picture">
-                    <strong><a href="{{ url_for('profile_page', username=reply.user.username) }}">{{ reply.user.username }}</a></strong>
+                    <strong><a href="{{ url_for('profile_page', user_id=reply.user.id) }}">{{ reply.user.username }}</a></strong>
                   </div>
                   <div class="comment_content">
                     {{ reply.content }}

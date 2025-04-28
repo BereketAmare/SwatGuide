@@ -24,23 +24,24 @@
             <div class="profile_pic_container">
                 <img class="p_p" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="profile pic">
             </div>
-            <h1 class="name">{{ user.username }}</h1>
+            <h1 class="name">{{ profile_user.username }}</h1>        
         </div>
-
     {# User description section #}
     <div class="profile_section">
         <h2 class="section_title">Description</h2>
         <div class="section_content">
             <div id="editableDiv" class="editable">
-                {{ user.description|safe if user.description else "This is a description" }}
+                {{ profile_user.description|safe if profile_user.description else "This is a description" }}
             </div>
         </div>
     </div>
 
-    {# Edit profile button #}
+    {# Edit profile button - only show if it's the user's own profile #}
+    {% if is_own_profile %}
     <button id="edit_button" class="edit_profile_btn button_link">
         <i class="fas fa-edit"></i>&nbsp;&nbsp;Edit
     </button>
+    {% endif %}
 
     <hr class="profile_divider">
 

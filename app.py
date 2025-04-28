@@ -157,11 +157,21 @@ def post_guide():
     return render_template("post_guide.html", user=user)
 
 # PROFILE
+@app.route("/profile/<int:user_id>")
 @app.route("/profile")
-def profile_page():
-    user = User.query.get(session['user_id'])
-    user_guides = Guide.query.filter_by(user_id=user.id).all()
-    return render_template("profile_page.html", user=user, guides=user_guides)
+def profile_page(user_id=None):
+    if user_id is None:
+        user_id = session.get('user_id')
+
+    profile_user = User.query.get_or_404(user_id)
+    logged_in_user = User.query.get(session.get('user_id'))
+    user_guides = Guide.query.filter_by(user_id=profile_user.id).all()
+
+    return render_template("profile_page.html",
+                           profile_user=profile_user,
+                           user=logged_in_user,
+                           guides=user_guides,
+                           is_own_profile=profile_user.id == session.get('user_id'))
 
 @app.route("/update_description", methods=['POST'])
 def update_description():
