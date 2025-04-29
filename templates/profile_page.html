@@ -75,10 +75,12 @@
                     </div>
                 {% endif %}
             </div>
-        </div>
+    </div>
         {# Logout button #}
+        {% if is_own_profile %}
         <div class="profile_logout">
             <button onclick="window.location.href='{{ url_for('logout') }}'" class="button_link"><i class="fas fa-sign-out-alt"></i>&nbsp;&nbsp;Log Out</button>
         </div>
+        {% endif %}
 </div>
 {% endblock %}
