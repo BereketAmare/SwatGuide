@@ -24,30 +24,75 @@
             <div class="profile_pic_container">
                 <img class="p_p" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="profile pic">
             </div>
-            <h1 class="name">{{ profile_user.username }}</h1>        
+            <h1 class="name">{{ user.username }}</h1>
         </div>
+
     {# User description section #}
     <div class="profile_section">
         <h2 class="section_title">Description</h2>
         <div class="section_content">
             <div id="editableDiv" class="editable">
-                {{ profile_user.description|safe if profile_user.description else "This is a description" }}
+                {{ user.description if user.description else "Tell us about yourself..." }}
             </div>
         </div>
     </div>
 
-    {# Edit profile button - only show if it's the user's own profile #}
-    {% if is_own_profile %}
-    <button id="edit_button" class="edit_profile_btn button_link">
-        <i class="fas fa-edit"></i>&nbsp;&nbsp;Edit
+    {# Edit profile button #}
+    <button id="edit_profile_btn" class="edit_profile_btn button_link">
+        <i class="fas fa-user-edit"></i>&nbsp;&nbsp;Edit Profile
     </button>
-    {% endif %}
+
+    <!-- Profile Edit Modal -->
+    <div id="profile_edit_modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Profile</h2>
+            <form id="profile_edit_form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" value="{{ user.username }}" maxlength="30" required>
+                    <small class="input-help">Maximum 30 characters</small>
+                </div>
+                <div class="form-group">
+                    <label for="description">About Me</label>
+                    <textarea id="description" name="description" maxlength="300" placeholder="Tell us about yourself...">{{ user.description }}</textarea>
+                    <small class="input-help character-count">0/300 characters</small>
+                </div>
+                <div class="form-group">
+                    <label for="profile_pic">Profile Picture</label>
+                    <div class="file-input-container">
+                        <input type="file" id="profile_pic" name="profile_pic" accept="image/*">
+                        <label for="profile_pic" class="file-label">
+                            <i class="fas fa-camera"></i> Choose Image
+                        </label>
+                    </div>
+                    <div id="image_preview"></div>
+                </div>
+                <button type="submit" class="button_link">Save Changes</button>
+            </form>
+        </div>
+    </div>
 
     <hr class="profile_divider">
 
     {# User's guide contributions #}
-    <div class="guide_list">
-        <h2 class="section_title">List of Contributed Guides</h2>
+    <div class="tab_container">
+        <div class="tab_buttons">
+            <button class="tab_button active" data-tab="contributed_guides">
+                <i class="fas fa-pen"></i> Contributed Guides
+            </button>
+            <button class="tab_button" data-tab="liked_guides">
+                <i class="fas fa-heart"></i> Liked Guides
+            </button>
+            <button class="tab_button" data-tab="your_comments">
+                <i class="fas fa-comments"></i> Your Comments
+            </button>
+        </div>
+    </div>
+
+    <div id="contributed_guides" class="tab_content active">
+        <div class="guide_list">
+            <h2 class="section_title">Contributed Guides</h2>
             <div class="list-group">
                 {% if guides %}
                     {% for guide in guides %}
@@ -75,12 +120,57 @@
                     </div>
                 {% endif %}
             </div>
+        </div>
     </div>
-        {# Logout button #}
-        {% if is_own_profile %}
+
+    <div id="liked_guides" class="tab_content">
+        <div class="guide_list">
+            <h2 class="section_title">Liked Guides</h2>
+            <div class="list-group">
+                {% if user.liked_guides.all() %}
+                    {% for guide in user.liked_guides %}
+                        <div class="list-group-item">
+                            <h4><a href="{{ url_for('view_guide', guide_id=guide.id) }}" class="view_guide_link">{{ guide.title }}</a></h4>
+                            {{ guide.content[:100] | striptags }}{% if guide.content|length > 100 %}... <a href="{{ url_for('view_guide', guide_id=guide.id) }}">Read more</a>{% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="list-group-item">
+                        <div class="no_wiki">
+                            <img src="{{ url_for('static', filename='images/svgviewer-output.svg') }}" alt="No Wiki Icon" class="no_wiki_icon">
+                            <h4>No liked guides yet</h4>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div id="your_comments" class="tab_content">
+        <div class="guide_list">
+            <h2 class="section_title">Your Comments</h2>
+            <div class="list-group">
+                {% if user.comments %}
+                    {% for comment in user.comments %}
+                        <div class="list-group-item">
+                            <h4><a href="{{ url_for('view_guide', guide_id=comment.guide.id) }}" class="view_guide_link">On: {{ comment.guide.title }}</a></h4>
+                            <div class="comment_content">{{ comment.content }}</div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="list-group-item">
+                        <div class="no_wiki">
+                            <img src="{{ url_for('static', filename='images/svgviewer-output.svg') }}" alt="No Wiki Icon" class="no_wiki_icon">
+                            <h4>No comments yet</h4>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {# Logout button #}
         <div class="profile_logout">
             <button onclick="window.location.href='{{ url_for('logout') }}'" class="button_link"><i class="fas fa-sign-out-alt"></i>&nbsp;&nbsp;Log Out</button>
         </div>
-        {% endif %}
 </div>
 {% endblock %}

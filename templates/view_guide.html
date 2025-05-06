@@ -26,7 +26,7 @@
       <h1>{{ guide.title }}</h1>
       <div class="guide_metadata">
         <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="{{ guide.user.username }}'s profile picture">
-        <a href="{{ url_for('profile_page', user_id=guide.user.id) }}">{{ guide.user.username }}</a>
+        <a href="{{ url_for('profile_page', username=guide.user.username) }}">{{ guide.user.username }}</a>
         <span class="date"><i class="fa-solid fa-calendar"></i>&nbsp;&nbsp;{{ guide.created_at.strftime('%B %d, %Y') }}</span>
       </div>
     </div>
@@ -38,18 +38,21 @@
       {{ guide.content | safe}}
     </div>
 
-    {# Edit button for guide owner #}
-    {% if user.id == guide.user_id %}
-    <button id="edit_guide_button" class="edit-profile-btn button_link" title="Edit guide content">
-      <i class="fas fa-edit"></i>&nbsp;&nbsp;Edit Guide
-    </button>
-    {% endif %}
+    <hr class="content-divider">
 
-    {# Guide engagement buttons #}
-    <div class="guide_engage"> 
+    {# All guide actions in one row #}
+    <div class="guide_actions">
+      {% if user.id == guide.user_id %}
+      <button id="edit_guide_button" class="icon-btn" title="Edit guide content">
+        <i class="fas fa-edit"></i>
+      </button>
+      <button id="delete_guide_button" class="icon-btn" title="Delete guide">
+        <i class="fas fa-trash"></i>
+      </button>
+      {% endif %}
       <button class="icon-btn like_post_btn" data-guide-id="{{ guide.id }}" title="Like guide">
         <span class="like_count">{{ guide.num_likes }}</span>
-        <i class="fas fa-heart"></i>
+        <i class="far fa-heart"></i>
       </button>
       <button class="icon-btn" id="reply_btn" title="Show comments">
         <span class="comment_count">{{ guide.comments|length }}</span>
@@ -59,13 +62,16 @@
         <i class="fas fa-flag"></i>
       </button>
     </div>
+</div>
 
+<div class="main_content_container comments_section">
     {# Comments section #}
     <h3>Comments</h3>
+    <hr class="content-divider">
     <div class="comment_form">
       <div class="comment_author_info">
         <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="{{ user.username }}'s profile picture">
-        <a href="{{ url_for('profile_page', user_id=user.id) }}">{{ user.username }}</a>
+        <a href="{{ url_for('profile_page') }}">{{ user.username }}</a>
       </div>
       <form action="{{ url_for('comment', guide_id=guide.id) }}" method="POST" id="comment_form"> 
         <textarea id="content" name="content" placeholder="Add your comment here..." required></textarea>
@@ -80,7 +86,7 @@
           {# Comment header with author info #}
           <div class="comment_header">
             <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="{{ comment.user.username }}'s profile picture">
-            <strong><a href="{{ url_for('profile_page', user_id=comment.user.id) }}">{{ comment.user.username }}</a></strong>
+            <strong><a href="{{ url_for('profile_page', username=comment.user.username) }}">{{ comment.user.username }}</a></strong>
           </div>
           {# Comment content #}
           <div class="comment_content">
@@ -93,7 +99,12 @@
             </button> 
             <button class="icon-btn report_cmnt_btn" title="Report comment">
               <i class="fas fa-flag"></i>
-            </button> 
+            </button>
+            {% if comment.user_id == session['user_id'] %}
+            <button class="icon-btn delete_cmnt_btn" title="Delete comment" data-comment-id="{{ comment.id }}">
+              <i class="fas fa-trash"></i>
+            </button>
+            {% endif %} 
           </div>
 
           {# Reply form #}
@@ -109,7 +120,7 @@
                 <li>
                   <div class="comment_header">
                     <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="{{ reply.user.username }}'s profile picture">
-                    <strong><a href="{{ url_for('profile_page', user_id=reply.user.id) }}">{{ reply.user.username }}</a></strong>
+                    <strong><a href="{{ url_for('profile_page', username=reply.user.username) }}">{{ reply.user.username }}</a></strong>
                   </div>
                   <div class="comment_content">
                     {{ reply.content }}
@@ -125,7 +136,7 @@
     {# Report overlay #}
     <div id="report_overlay">
       <div id="report_container">
-        <button class="exit" onclick="option('X')">X</button>
+        <button class="exit" onclick="option('X')"><i class="fas fa-times"></i></button>
         <p>Select a reason</p>
         <button class="report_option" onclick="option('Spam')">Spam</button>
         <button class="report_option" onclick="option('Inappropriate')">Inappropriate</button>
@@ -136,8 +147,32 @@
     {# Message overlay #}
     <div id="message_overlay">
       <div id="message_container">
-        <button class="exit" onclick="option('X')">X</button>
+        <button class="exit" onclick="option('X')"><i class="fas fa-times"></i></button>
         <p>Your report has been submitted!</p>
+      </div>
+    </div>
+
+    {# Delete Guide Confirmation Modal #}
+    <div id="delete_guide_modal" class="modal">
+      <div class="modal-content">
+        <h3>Delete Guide</h3>
+        <p>Are you sure you want to delete this guide? This action cannot be undone.</p>
+        <div class="modal-buttons">
+          <button class="button_link" id="confirm_delete_guide">Delete</button>
+          <button class="button_link cancel-btn" id="cancel_delete_guide">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    {# Delete Comment Confirmation Modal #}
+    <div id="delete_comment_modal" class="modal">
+      <div class="modal-content">
+        <h3>Delete Comment</h3>
+        <p>Are you sure you want to delete this comment?</p>
+        <div class="modal-buttons">
+          <button class="button_link" id="confirm_delete_comment">Delete</button>
+          <button class="button_link cancel-btn" id="cancel_delete_comment">Cancel</button>
+        </div>
       </div>
     </div>
 

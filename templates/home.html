@@ -6,6 +6,7 @@
 {# Header section with search functionality and guide creation button #}
 {% block header_links %}
 {{ super() }}
+<script src="{{ url_for('static', filename='js/home.js') }}" defer></script>
 
 {# Search container with form #}
 <div class="search_container">
@@ -33,7 +34,21 @@
 {% block content %}
 {# Top guides header #}
 <div class="header_container">
-    <h1 class = "top_guide">Top Guides</h1>
+    <h1 class="top_guide">Top Guides</h1>
+    <div class="filter_sort_controls">
+        <select id="sort_by" name="sort_by">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="most_liked">Most Liked</option>
+            <option value="most_commented">Most Commented</option>
+        </select>
+        <select id="time_filter" name="time_filter">
+            <option value="all">All Time</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+        </select>
+    </div>
 </div>
 
 {# Guide listings container #}
@@ -49,10 +64,9 @@
                                 {{ guide.title }}
                             </a>
                         </h4>
-                        <h5>By <a href="{{ url_for('profile_page', user_id=guide.user_id) }}" class="profile-link">{{ guide.user.username }}</a>
-                        </h5>
+                        <h5>By <a href="{{ url_for('profile_page', username=guide.user.username) }}">{{ guide.user.username }}</a></h5>
                         <div class="guide_content_preview">
-                            {{ guide.content[:150] | striptags }}{% if guide.content|length > 100 %}...{% endif %}
+                            {{ guide.content[:170] | striptags }}{% if guide.content|length > 100 %}...{% endif %}
                         </div>
                         <div class="guide_footer">
                             <div class="guide_engage">
@@ -65,7 +79,7 @@
                                     <i class="fas fa-comment-dots"></i>
                                 </button>
                             </div>
-                            {% if guide.content|length > 150 %}
+                            {% if guide.content|length > 170 %}
                             <a href="{{ url_for('view_guide', guide_id=guide.id) }}" class="read_more button_link">Read more</a>
                             {% endif %}
                         </div>
