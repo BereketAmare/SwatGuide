@@ -9,16 +9,21 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-app.secret_key = os.environ.get("SECRET_KEY", "dev-please-change")
+app.secret_key = os.environ.get("SECRET_KEY")
 
-db_uri = os.environ["DATABASE_URL"].replace("postgres://", "postgresql://")
-app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
+db_url = os.environ.get("DATABASE_URL", "sqlite:///database.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url.replace("postgres://", "postgresql://")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_HTTPONLY=True,
+)
 
 db.init_app(app)
 
 from models import Guide, Comment, Reply, User, Report
-
 
 
 with app.app_context():
