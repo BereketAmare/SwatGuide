@@ -3,6 +3,12 @@
 <html lang="en">
 {% block head %}
 <head>
+    <script>
+        // Preload dark mode setting
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark-mode');
+        }
+    </script>
     {# Meta tags for character encoding and responsive viewport #}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,9 +17,10 @@
     <title>{% block title %}SwatGuide{% endblock %}</title>
     
     {# External resources and stylesheets #}
-    <link rel="icon" href="{{ url_for('static', filename='images/swat_guide_logo3.png') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/swat_guide_logo3.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="{{ url_for('static', filename='js/dark_mode.js') }}" defer></script>
 </head>
 {% endblock %}
 <body>
@@ -36,14 +43,37 @@
         {# User profile section #}
         {% block profile %}
         <div id="profile">
-            <h1>
-                <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="profile pic">
-                {% if user %}
-                <a href="{{ url_for('profile_page') }}">{{ user.username }}</a>
-                {% else %}
-                <a href="{{ url_for('login') }}">Login</a>
-                {% endif %}
-            </h1>
+            {% if user %}
+            <div class="dropdown">
+                <button class="dropbtn">
+                    <img class="profile_pic" src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="profile pic">
+                    <span>{{ user.username }}</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="dropdown-content">
+                    <a href="{{ url_for('profile_page') }}"><i class="fas fa-user"></i> Profile</a>
+                    <a href="{{ url_for('notifications') }}">
+                        <i class="fas fa-bell"></i> Notifications
+                        {% if user.notifications|selectattr('is_read', 'false')|list|length > 0 %}
+                            <span class="notification-badge">{{ user.notifications|selectattr('is_read', 'false')|list|length }}</span>
+                        {% endif %}
+                    </a>
+                    <hr>
+                    <div class="theme-toggle-wrapper">
+                        <span><i class="fas fa-sun"></i></span>
+                        <label class="theme-switch">
+                            <input type="checkbox" id="theme_toggle">
+                            <span class="slider round"></span>
+                        </label>
+                        <span><i class="fas fa-moon"></i></span>
+                    </div>
+                    <hr>
+                    <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="login-link">Login</a>
+            {% endif %}
         </div>
         {% endblock %}
     </div>

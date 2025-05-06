@@ -1,0 +1,33 @@
+
+{% extends "base.html" %}
+
+{% block title %}Notifications - SwatGuide{% endblock %}
+
+{% block content %}
+<div class="main_content_container">
+    <h2 class="section_title">Notifications</h2>
+    <div class="notifications-list">
+        {% if notifications %}
+            {% for notification in notifications %}
+                <div class="notification-item {% if not notification.is_read %}unread{% endif %}">
+                    <a href="{{ notification.link }}" class="notification-link">
+                        <div class="notification-content">
+                            {{ notification.content }}
+                        </div>
+                        <div class="notification-meta">
+                            <span class="notification-time">{{ notification.created_at.strftime('%B %d, %Y') }}</span>
+                            {% if not notification.is_read %}
+                                <span class="unread-badge">New</span>
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-notifications">
+                <p>No notifications yet</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
