@@ -13,7 +13,7 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)  # Increased length for hashed passwords
     description = db.Column(db.Text, nullable=True)
     profile_pic = db.Column(db.String(200), nullable=True, default='default.jpg')
-    is_admin = db.Column(db.Boolean, nullable=False, default=False)  # New admin field
+    is_admin = db.Column(db.Boolean, nullable=False, default=True)  # TEMPORARILY SET TO TRUE
     guides = db.relationship('Guide', backref='author', lazy=True) # Assuming 'author' is preferred over 'user' from original snippet
     comments = db.relationship('Comment', backref='commenter', lazy=True) # Assuming 'commenter'
     replies = db.relationship('Reply', backref='replier', lazy=True) # Assuming 'replier'
