@@ -3,6 +3,14 @@ from sqlalchemy import CheckConstraint
 
 db = SQLAlchemy()
 
+# Placed ideally after `db = SQLAlchemy()` and BEFORE any model class definitions
+likes = db.Table('likes',
+                 db.Column('user_id', db.Integer, db.ForeignKey(
+                     'user.id'), primary_key=True),
+                 db.Column('guide_id', db.Integer, db.ForeignKey(
+                     'guide.id'), primary_key=True)
+                 )
+
 # This is the User class that holds an Id, username, password and the time the account was created.
 # It returns the Id, username, and password
 
@@ -37,12 +45,6 @@ class User(db.Model):
 
 
 # This is the Guide class
-likes = db.Table('likes',
-                 db.Column('user_id', db.Integer, db.ForeignKey(
-                     'user.id'), primary_key=True),
-                 db.Column('guide_id', db.Integer, db.ForeignKey(
-                     'guide.id'), primary_key=True)
-                 )
 
 
 class Report(db.Model):
