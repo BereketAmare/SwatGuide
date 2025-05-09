@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - SwatGuide{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Admin Dashboard</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h2 class="mt-5 mb-3">All Guides</h2>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Author</th>
+                    <th scope="col">Created At</th>
+                    <th scope="col">Likes</th>
+                    <th scope="col">Comments Count</th>
+                    <th scope="col">Reports Count</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for guide in guides %}
+                <tr>
+                    <td>{{ guide.id }}</td>
+                    <td><a href="{{ url_for('view_guide', guide_id=guide.id) }}">{{ guide.title }}</a></td>
+                    <td>{{ guide.author.username if guide.author else 'N/A' }}</td>
+                    <td>{{ guide.created_at.strftime('%Y-%m-%d %H:%M') if guide.created_at else 'N/A' }}</td>
+                    <td>{{ guide.num_likes }}</td>
+                    <td>{{ guide.comments|length }}</td>
+                    <td>{{ guide.reports|length }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('admin_delete_guide', guide_id=guide.id) }}" onsubmit="return confirm('Are you sure you want to delete this guide and all its related content?');" style="display: inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center">No guides found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Section to display comments (simplified) -->
+    <h2 class="mt-5 mb-3">Recent Comments</h2>
+    <ul class="list-group">
+        {% for guide in guides %}
+            {% for comment in guide.comments %}
+                <li class="list-group-item">
+                    <p><strong>On Guide:</strong> <a href="{{ url_for('view_guide', guide_id=guide.id) }}">{{ guide.title }}</a></p>
+                    <p><strong>{{ comment.commenter.username if comment.commenter else 'N/A' }}:</strong> {{ comment.content }}</p>
+                    <small class="text-muted">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') if comment.created_at else ''}}</small>
+                </li>
+            {% endfor %}
+        {% else %}
+             <li class="list-group-item">No comments yet.</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Section to display reports (simplified) -->
+    <h2 class="mt-5 mb-3">User Reports</h2>
+    <ul class="list-group">
+        {% for guide in guides %}
+            {% for report in guide.reports %}
+                <li class="list-group-item list-group-item-warning">
+                    <p><strong>Reported Guide:</strong> <a href="{{ url_for('view_guide', guide_id=guide.id) }}">{{ guide.title }}</a></p>
+                    <p><strong>Reported by:</strong> {{ report.reporter.username if report.reporter else 'N/A' }}</p>
+                    <p><strong>Reason:</strong> {{ report.report_type }}</p>
+                    <small class="text-muted">{{ report.created_at.strftime('%Y-%m-%d %H:%M') if report.created_at else ''}}</small>
+                </li>
+            {% endfor %}
+        {% else %}
+            <li class="list-group-item">No reports yet.</li>
+        {% endfor %}
+    </ul>
+
+</div>
+{% endblock %} 

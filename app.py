@@ -1,9 +1,10 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, make_response, jsonify, session
+from flask import Flask, render_template, request, redirect, url_for, make_response, jsonify, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from models import db, Guide, Comment, Reply, User, Report, Notification
 from datetime import datetime
+from functools import wraps
 
 # Initialize Flask application
 
@@ -21,6 +22,20 @@ from models import Guide, Comment, Reply, User, Report, Notification
 
 with app.app_context():
     db.create_all()
+
+# Admin Required Decorator
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please log in to access this page.', 'warning')
+            return redirect(url_for('login'))
+        user = User.query.get(session['user_id'])
+        if not user or not user.is_admin:
+            flash('You do not have permission to access this page.', 'danger')
+            return redirect(url_for('home'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 # HOME 
 @app.route("/")
@@ -375,6 +390,38 @@ def mark_notification_read(notification_id):
     # Redirect to the link associated with the notification
     # Or return a success response if it's an AJAX call
     return redirect(notification.link if notification.link else url_for('notifications'))
+
+@app.route('/admin/dashboard')
+@admin_required
+def admin_dashboard():
+    guides = Guide.query.order_by(Guide.created_at.desc()).all()
+    # For a more complete dashboard, you might fetch comments and reports separately
+    # or rely on relationships when displaying details. For simplicity here, we fetch all.
+    # comments = Comment.query.order_by(Comment.created_at.desc()).all()
+    # reports = Report.query.order_by(Report.created_at.desc()).all()
+    return render_template('admin_dashboard.html', guides=guides, user=User.query.get(session['user_id']))
+
+@app.route('/admin/delete_guide/<int:guide_id>', methods=['POST'])
+@admin_required
+def admin_delete_guide(guide_id):
+    guide = Guide.query.get_or_404(guide_id)
+    try:
+        # Need to delete associated comments, replies, reports, and likes first 
+        # or set up cascade delete in your SQLAlchemy models if not already done.
+        
+        # Example: Delete comments associated with the guide
+        Comment.query.filter_by(guide_id=guide.id).delete()
+        # Example: Delete reports associated with the guide
+        Report.query.filter_by(guide_id=guide.id).delete()
+        # (Add similar for replies and handle likes table if you have a direct association table)
+
+        db.session.delete(guide)
+        db.session.commit()
+        flash(f'Guide "{guide.title}" has been deleted.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting guide: {str(e)}', 'danger')
+    return redirect(url_for('admin_dashboard'))
 
 if __name__ == '__main__':
     app.run(debug=True)

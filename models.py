@@ -9,16 +9,31 @@ db = SQLAlchemy()
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)  # Primary key
-    # Unique username unique=True,
-    username = db.Column(db.String(30), nullable=False)
-    password = db.Column(db.String(150), nullable=False)
-    description = db.Column(db.String(300), nullable=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)  # Increased length for hashed passwords
+    description = db.Column(db.Text, nullable=True)
+    profile_pic = db.Column(db.String(200), nullable=True, default='default.jpg')
+    is_admin = db.Column(db.Boolean, nullable=False, default=False)  # New admin field
+    guides = db.relationship('Guide', backref='author', lazy=True) # Assuming 'author' is preferred over 'user' from original snippet
+    comments = db.relationship('Comment', backref='commenter', lazy=True) # Assuming 'commenter'
+    replies = db.relationship('Reply', backref='replier', lazy=True) # Assuming 'replier'
+    reports = db.relationship('Report', backref='reporter', lazy=True) # Assuming 'reporter'
+    liked_guides = db.relationship('Guide', secondary=likes, backref=db.backref('liked_by_users', lazy='dynamic')) # Corrected from 'liked_by' to 'liked_by_users' to avoid conflict if 'liked_by' exists on Guide from another relationship
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
     # __repr__ returns a String representation of the Users class when
     # we print out an object of type Users
     def __repr__(self) -> str:
         return f"ID: {self.id}, Username: {self.username}, Password: {self.password}"
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'description': self.description,
+            'profile_pic': self.profile_pic,
+            'is_admin': self.is_admin  # Add to serialization if needed elsewhere
+        }
 
 
 # This is the Guide class
