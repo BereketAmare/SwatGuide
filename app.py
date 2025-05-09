@@ -28,9 +28,7 @@ with app.app_context():
 @app.route("/")
 def home():
     """Render the home page with guides and user information."""
-    # Clear any expired sessions
     if 'user_id' not in session:
-        session.clear()
         return redirect(url_for('login'))
     
     try:
@@ -51,11 +49,12 @@ def home():
                 'comments': guide.comments,
                 'title': guide.title,
                 'user': {
-                    'username': guide.user.username
+                    'username': guide.user.username if guide.user else 'Unknown User'
                 }
             })
         return render_template('home.html', guides=guide_data, user=user)
     except Exception as e:
+        app.logger.error(f"Error in home route: {str(e)}") # Log the specific error
         session.clear()
         return redirect(url_for('login'))
 
