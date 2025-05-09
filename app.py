@@ -2,7 +2,7 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, make_response, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from models import db, Guide, Comment, Reply, User, Report
+from models import db, Guide, Comment, Reply, User, Report, Notification
 from datetime import datetime
 
 # Initialize Flask application
@@ -17,9 +17,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
 
-from models import Guide, Comment, Reply, User, Report
-
-
+from models import Guide, Comment, Reply, User, Report, Notification
 
 with app.app_context():
     db.create_all()
@@ -245,6 +243,17 @@ def comment(guide_id):
     if content and user:
         new_comment = Comment(guide_id=guide.id, content=content, user=user)
         db.session.add(new_comment)
+        
+        # Create notification for guide owner
+        if guide.user_id != user.id: # Don't notify if user comments on their own guide
+            notification = Notification(
+                user_id=guide.user_id,
+                content=f"{user.username} commented on your guide: \"{guide.title}\"",
+                type='comment',
+                link=url_for('view_guide', guide_id=guide.id, _external=True) # _external=True for full URLs if needed
+            )
+            db.session.add(notification)
+        
         db.session.commit()
         return make_response(jsonify({"success": True, "comment": new_comment.serialize()}), 200)
     
@@ -275,6 +284,7 @@ def like_guide(guide_id):
     user = User.query.get(session['user_id'])
     guide = Guide.query.get_or_404(guide_id)
     
+    isLiked = False # Initialize isLiked
     if user in guide.liked_by:
         guide.liked_by.remove(user)
         guide.num_likes = max(0, guide.num_likes - 1)
@@ -283,6 +293,16 @@ def like_guide(guide_id):
         guide.liked_by.append(user)
         guide.num_likes += 1
         isLiked = True
+        
+        # Create notification for guide owner
+        if guide.user_id != user.id: # Don't notify if user likes their own guide
+            notification = Notification(
+                user_id=guide.user_id,
+                content=f"{user.username} liked your guide: \"{guide.title}\"",
+                type='like',
+                link=url_for('view_guide', guide_id=guide.id, _external=True) # _external=True for full URLs
+            )
+            db.session.add(notification)
         
     db.session.commit()
     return jsonify({'likes': guide.num_likes, 'isLiked': isLiked})
@@ -325,6 +345,36 @@ def update_guide(guide_id):
         return jsonify({'success': True})
     
     return jsonify({'error': 'No content provided'}), 400
+
+@app.route('/notifications')
+def notifications():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user = User.query.get(session['user_id'])
+    if not user: # Good practice to check if user exists
+        session.clear()
+        return redirect(url_for('login'))
+    
+    # Assuming 'notifications_received' is the backref from the Notification model to User
+    user_notifications = Notification.query.filter_by(user_id=user.id).order_by(Notification.created_at.desc()).all()
+    return render_template('notifications.html', notifications=user_notifications, user=user)
+
+@app.route('/mark_notification_read/<int:notification_id>')
+def mark_notification_read(notification_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401 # Return JSON for fetch requests if appropriate
+        
+    notification = Notification.query.get_or_404(notification_id)
+    
+    # Ensure the notification belongs to the logged-in user
+    if notification.user_id != session['user_id']:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    notification.is_read = True
+    db.session.commit()
+    # Redirect to the link associated with the notification
+    # Or return a success response if it's an AJAX call
+    return redirect(notification.link if notification.link else url_for('notifications'))
 
 if __name__ == '__main__':
     app.run(debug=True)
