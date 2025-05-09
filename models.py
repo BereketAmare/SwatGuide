@@ -21,12 +21,16 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)  # Increased length for hashed passwords
     description = db.Column(db.Text, nullable=True)
     profile_pic = db.Column(db.String(200), nullable=True, default='default.jpg')
-    is_admin = db.Column(db.Boolean, nullable=False, default=True)  # TEMPORARILY SET TO TRUE
-    guides = db.relationship('Guide', backref='author', lazy=True) # Assuming 'author' is preferred over 'user' from original snippet
-    comments = db.relationship('Comment', backref='commenter', lazy=True) # Assuming 'commenter'
-    replies = db.relationship('Reply', backref='replier', lazy=True) # Assuming 'replier'
-    reports = db.relationship('Report', backref='reporter', lazy=True) # Assuming 'reporter'
-    liked_guides = db.relationship('Guide', secondary=likes, backref=db.backref('liked_by_users', lazy='dynamic')) # Corrected from 'liked_by' to 'liked_by_users' to avoid conflict if 'liked_by' exists on Guide from another relationship
+    is_admin = db.Column(db.Boolean, nullable=False, default=False) # Reverted temporary default
+    
+    # This User.guides relationship will create 'author' on Guide via backref
+    guides = db.relationship('Guide', backref='author', lazy='dynamic') 
+    
+    comments = db.relationship('Comment', backref='commenter', lazy='dynamic')
+    replies = db.relationship('Reply', backref='replier', lazy='dynamic')
+    reports = db.relationship('Report', backref='reporter', lazy='dynamic')
+    liked_guides = db.relationship('Guide', secondary=likes, lazy='dynamic',
+                                 backref=db.backref('liked_by_users', lazy='dynamic'))
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
     # __repr__ returns a String representation of the Users class when
@@ -65,12 +69,14 @@ class Report(db.Model):
 
 class Guide(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) # Foreign key to User
+    # The 'author' property will be available on Guide instances due to the backref from User.guides
+    # No need for: user = db.relationship('User', backref='guides') as it conflicts
+    
     reports = db.relationship('Report', backref='guide', lazy=True)
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     num_likes = db.Column(db.Integer, default=0)
-    user = db.relationship('User', backref='guides')
     liked_by = db.relationship(
         'User', secondary=likes, backref=db.backref('liked_guides', lazy='dynamic'))
     comments = db.relationship(
@@ -78,7 +84,7 @@ class Guide(db.Model):
     title = db.Column(db.String(255), nullable=False)
 
     def __repr__(self) -> str:
-        string = f"ID: {self.id}, Num_likes: {self.num_likes}, Title: {self.title}, Content: {self.content}, Created_At: {self.created_at}, Comments: {self.comments}, User: {self.user}"
+        string = f"ID: {self.id}, Num_likes: {self.num_likes}, Title: {self.title}, Content: {self.content}, Created_At: {self.created_at}, Comments: {self.comments}, User: {self.user_id}"
         return string
 
     def serialize(self):
