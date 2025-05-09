@@ -1,18 +1,31 @@
 
 // Like button functionality
-document.querySelectorAll('.like_post_btn').forEach(btn => {
-    const guideId = btn.getAttribute('data-guide-id');
-    const likeSpan = btn.querySelector('.like_count');
-    let isLiked = btn.classList.contains('liked');
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.like_post_btn').forEach(btn => {
+        const guideId = btn.getAttribute('data-guide-id');
+        const likeSpan = btn.querySelector('.like_count');
+        const heartIcon = btn.querySelector('i');
 
-    // Handle like button clicks
-    btn.addEventListener('click', () => {
-        updateGuideLikes(guideId, isLiked, likeSpan, btn);
+        // Initial state
+        const isLiked = btn.classList.contains('liked');
+        if (isLiked) {
+            heartIcon.classList.remove('far');
+            heartIcon.classList.add('fas');
+        } else {
+            heartIcon.classList.remove('fas');
+            heartIcon.classList.add('far');
+        }
+
+        // Handle like button clicks
+        btn.addEventListener('click', () => {
+            const willBeLiked = !btn.classList.contains('liked');
+            updateGuideLikes(guideId, willBeLiked, likeSpan, btn, heartIcon);
+        });
     });
 });
 
 // Update guide likes via API
-async function updateGuideLikes(guideId, isLiked, likeSpan, btn) {
+async function updateGuideLikes(guideId, isLiked, likeSpan, btn, heartIcon) {
     try {
         const response = await fetch(`/like_guide/${guideId}`, {
             method: 'POST',
@@ -25,6 +38,14 @@ async function updateGuideLikes(guideId, isLiked, likeSpan, btn) {
         if (data.likes !== undefined) {
             likeSpan.innerText = data.likes;
             btn.classList.toggle('liked');
+            
+            if (data.isLiked) {
+                heartIcon.classList.remove('far');
+                heartIcon.classList.add('fas');
+            } else {
+                heartIcon.classList.remove('fas');
+                heartIcon.classList.add('far');
+            }
         }
     } catch (error) {
         console.error('Error updating likes:', error);
@@ -45,8 +66,44 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeGuideEditor();
     initializeReportButtons();
     initializeCommentSystem();
+    initializeDeleteButton();
     updateCommentCount();
 });
+
+function initializeDeleteButton() {
+    const deleteButton = document.getElementById('delete_guide_button');
+    const deleteModal = document.getElementById('delete_guide_modal');
+    const confirmDelete = document.getElementById('confirm_delete_guide');
+    const cancelDelete = document.getElementById('cancel_delete_guide');
+
+    if (deleteButton && deleteModal) {
+        deleteButton.addEventListener('click', () => {
+            deleteModal.style.display = 'block';
+        });
+
+        confirmDelete.addEventListener('click', async () => {
+            const guideId = window.location.pathname.split('/').pop();
+            try {
+                const response = await fetch(`/delete_guide/${guideId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Error deleting guide:', error);
+            }
+        });
+
+        cancelDelete.addEventListener('click', () => {
+            deleteModal.style.display = 'none';
+        });
+    }
+}
 
 // Initialize CKEditor for guide editing
 function initializeGuideEditor() {
@@ -174,6 +231,56 @@ function initializeCommentSystem() {
     setupReplyButtons();
     setupCommentForm();
     setupReplyForms();
+    setupDeleteButtons();
+}
+
+function setupDeleteButtons() {
+    const deleteModal = document.getElementById('delete_comment_modal');
+    const confirmDelete = document.getElementById('confirm_delete_comment');
+    const cancelDelete = document.getElementById('cancel_delete_comment');
+    let currentCommentButton = null;
+
+    document.querySelectorAll('.delete_cmnt_btn').forEach(button => {
+        button.addEventListener('click', () => {
+            currentCommentButton = button;
+            deleteModal.style.display = 'block';
+        });
+    });
+
+    confirmDelete.addEventListener('click', async () => {
+        if (!currentCommentButton) return;
+        
+        const commentId = currentCommentButton.getAttribute('data-comment-id');
+        try {
+            const response = await fetch(`/delete_comment/${commentId}`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    currentCommentButton.closest('.comment').remove();
+                    deleteModal.style.display = 'none';
+                }
+            }
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+        }
+    });
+
+    cancelDelete.addEventListener('click', () => {
+        deleteModal.style.display = 'none';
+        currentCommentButton = null;
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', (event) => {
+        if (event.target === deleteModal) {
+            deleteModal.style.display = 'none';
+            currentCommentButton = null;
+        }
+    });
 }
 
 // Set up reply button functionality
