@@ -77,8 +77,13 @@ class Guide(db.Model):
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     num_likes = db.Column(db.Integer, default=0)
-    liked_by = db.relationship(
-        'User', secondary=likes, backref=db.backref('liked_guides', lazy='dynamic'))
+    
+    # The relationship from User.liked_guides creates guide.liked_by_users.
+    # So, the explicit 'liked_by' relationship below is redundant and causes conflict.
+    # We will remove it.
+    # liked_by = db.relationship(
+    #     'User', secondary=likes, backref=db.backref('liked_guides', lazy='dynamic'))
+        
     comments = db.relationship(
         'Comment', backref='guide', cascade="all, delete-orphan", lazy=True)
     title = db.Column(db.String(255), nullable=False)
